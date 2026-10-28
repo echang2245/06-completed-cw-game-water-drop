@@ -4,37 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Drop Game</title>
+    <title>Water Drop Game | charity: water</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <div class="game-wrapper">
 
-        <header class="brand-header">
+        <!-- Header -->
+        <header class="site-header">
             <img
                 src="img/cw_logo-horizontal.png"
-                alt="charity: water"
+                alt="charity: water logo"
                 class="charity-logo"
             >
+
+            <div class="hero-panel">
+                <div class="hero-copy">
+                    <h1 class="game-title">Water Drop</h1>
+
+                    <p class="game-tagline">
+                        Catch the good drops, avoid the bad ones!
+                    </p>
+                </div>
+
+                <div class="hero-visual" aria-label="clean water mission illustration">
+                    <img src="img/water-can-transparent.png" alt="water can illustration" class="water-can-icon">
+                    <span>Clean water for everyone</span>
+                </div>
+            </div>
         </header>
 
-        <div class="game-heading">
-            <div>
-                <h1 class="game-title">Water Drop</h1>
-                <p class="game-tagline">
-                    Catch the good drops, avoid the bad ones!
-                </p>
-            </div>
-            <img
-                src="img/water-can-transparent.png"
-                alt=""
-                class="water-can-illustration"
-            >
+        <!-- Difficulty selection -->
+        <div class="difficulty-panel">
+            <label for="difficulty">Choose Difficulty:</label>
+
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+            </select>
         </div>
 
-        <!-- Score, timer, and start button -->
+        <!-- Game information -->
         <div class="score-panel">
+
             <div class="score">
                 Score: <span id="score">0</span>
             </div>
@@ -43,18 +57,84 @@
                 Time: <span id="time">30</span>s
             </div>
 
+            <div class="goal">
+                Goal: <span id="goal">20</span>
+            </div>
+
             <button id="start-btn">Start Game</button>
+
         </div>
+
+        <!-- Progress bar -->
+        <div class="progress-section">
+            <p>Progress to Goal</p>
+
+            <div class="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Milestone messages -->
+        <p id="milestone-message" aria-live="polite"></p>
 
         <!-- Game area -->
         <div id="game-container">
+
             <div id="game-message" role="status" aria-live="polite"></div>
+
         </div>
 
         <!-- Instructions -->
-        <p class="instructions">
-            Blue drops = +1 point | Red drops = -1 point
-        </p>
+        <div class="instructions">
+            <p>Blue Drops: +1 Point</p>
+            <p>Red Drops: -1 Point</p>
+        </div>
+
+        <!-- Sound toggle -->
+        <label class="sound-control">
+            <input type="checkbox" id="sound-toggle" checked>
+            Enable Sound Effects
+        </label>
+
+        <!-- Mission section -->
+        <section class="mission-section">
+            <div class="mission-visuals">
+                <img src="img/water-can.png" alt="water can" class="mission-can">
+                <img src="img/cw_logo.png" alt="charity: water logo" class="mission-logo">
+            </div>
+
+            <h2>Every Drop Counts!</h2>
+
+            <p>
+                charity: water is a nonprofit organization working to bring clean and safe drinking water to people around the world.
+            </p>
+
+            <p>
+                Every drop in this game reflects a real effort to make water access possible for families and communities.
+            </p>
+
+            <a
+                href="https://www.charitywater.org/donate"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="donate-btn"
+            >
+                Help Bring Clean Water
+            </a>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>Inspired by charity: water</p>
+
+            <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">
+                Visit Website
+            </a>
+
+            <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">
+                Donate
+            </a>
+        </footer>
 
     </div>
 

@@ -1,8 +1,9 @@
 
-/* Charity: water brand colors
+/* charity: water brand colors
 Yellow: #FFC907
 Blue: #2E9DF7
 Red: #F5402C
+Light Blue: #8BD1CB
 */
 
 * {
@@ -12,63 +13,112 @@ Red: #F5402C
 }
 
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     background-color: #f5f5f5;
-    font-family: Avenir, Arial, sans-serif;
+    font-family: Avenir, "Avenir Next", Arial, sans-serif;
     padding: 20px;
 }
 
-/* Main game wrapper */
+/* Main game layout */
 .game-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    width: 100%;
     max-width: 800px;
+    margin: auto;
 }
 
-/* Brand header */
-.brand-header {
+/* Header */
+header {
+    text-align: center;
     width: 100%;
+}
+
+.site-header {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
 }
 
 .charity-logo {
-    display: block;
-    width: min(240px, 70vw);
+    max-width: 260px;
     height: auto;
 }
 
-.game-heading {
+.hero-panel {
+    width: min(100%, 620px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    width: 100%;
+    gap: 24px;
+    padding: 18px 20px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(46, 157, 247, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(19, 19, 19, 0.06);
 }
 
-.water-can-illustration {
-    width: 76px;
-    height: 76px;
+.hero-copy {
+    flex: 1;
+    text-align: left;
+}
+
+.hero-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #1f5d99;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.water-can-icon,
+.mission-logo,
+.mission-can,
+.charity-logo {
+    display: block;
+    height: auto;
+    max-width: 100%;
     object-fit: contain;
 }
 
-/* Game title */
+.water-can-icon {
+    max-width: 110px;
+    filter: drop-shadow(0 8px 14px rgba(46, 157, 247, 0.18));
+}
+
 .game-title {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
     color: #131313;
-    font-size: 48px;
-    text-align: center;
+    line-height: 1.1;
 }
 
 .game-tagline {
+    font-size: 1.1rem;
     color: #555;
+    margin-top: 10px;
+}
+
+/* Difficulty selector */
+.difficulty-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 18px;
-    text-align: center;
+    font-weight: bold;
+}
+
+#difficulty {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #2E9DF7;
+    border-radius: 6px;
+    background-color: white;
 }
 
 /* Score panel */
@@ -76,28 +126,32 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     width: 100%;
     padding: 15px;
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.score, .timer {
-    font-size: 24px;
+.score,
+.timer,
+.goal {
+    font-size: 22px;
     font-weight: bold;
 }
 
 /* Start button */
 #start-btn {
-    padding: 10px 20px;
     background-color: #FFC907;
     color: #131313;
     border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 12px 20px;
     font-size: 16px;
     font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 #start-btn:hover {
@@ -109,26 +163,67 @@ body {
     cursor: not-allowed;
 }
 
-/* Game container */
+/* Progress bar */
+.progress-section {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+}
+
+.progress-container {
+    width: 100%;
+    height: 20px;
+    background-color: #ddd;
+    border-radius: 10px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #4FCB53;
+    transition: width 0.3s ease;
+}
+
+/* Milestone messages */
+#milestone-message {
+    min-height: 28px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #159A48;
+    text-align: center;
+}
+
+/* Game area */
 #game-container {
     width: 100%;
     height: 600px;
-    background-color: #e6f7ff;
+    background: linear-gradient(
+        to bottom,
+        #e6f7ff,
+        #b8e6ff
+    );
     border: 3px solid #2E9DF7;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
+    touch-action: manipulation;
 }
 
-/* Water drops */
+/* Falling drops */
 .water-drop {
     position: absolute;
     top: 0;
     background-color: #2E9DF7;
     border-radius: 50%;
-    animation: dropFall linear forwards;
     cursor: pointer;
+    animation: dropFall linear forwards;
     touch-action: manipulation;
+}
+
+.water-drop:hover {
+    filter: brightness(1.1);
 }
 
 /* Bad drops */
@@ -136,14 +231,14 @@ body {
     background-color: #F5402C;
 }
 
-/* Animation for falling drops */
+/* Falling animation */
 @keyframes dropFall {
     from {
         transform: translateY(-100%);
     }
 
     to {
-        transform: translateY(600px);
+        transform: translateY(var(--fall-distance));
     }
 }
 
@@ -158,7 +253,7 @@ body {
     padding: 30px;
     background-color: white;
     border: 3px solid #FFC907;
-    border-radius: 10px;
+    border-radius: 12px;
     text-align: center;
     font-size: 24px;
     font-weight: bold;
@@ -167,33 +262,118 @@ body {
 
 /* Instructions */
 .instructions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
     font-size: 16px;
-    color: #555;
+    font-weight: bold;
+}
+
+.instructions p:first-child {
+    color: #2E9DF7;
+}
+
+.instructions p:last-child {
+    color: #F5402C;
+}
+
+/* Sound control */
+.sound-control {
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Mission section */
+.mission-section {
+    width: 100%;
+    padding: 30px;
+    background: linear-gradient(135deg, #ffca2f, #f4d965);
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 12px 24px rgba(255, 201, 7, 0.2);
+}
+
+.mission-visuals {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.mission-logo {
+    max-width: 110px;
+}
+
+.mission-can {
+    max-width: 95px;
+    filter: drop-shadow(0 8px 16px rgba(19, 19, 19, 0.12));
+}
+
+.mission-visuals img {
+    flex-shrink: 0;
+}
+
+.mission-section h2 {
+    margin-bottom: 15px;
+    font-size: clamp(1.8rem, 3vw, 2.3rem);
+}
+
+.mission-section p {
+    margin: 0 auto 15px;
+    max-width: 600px;
+    line-height: 1.6;
+    font-size: 1.05rem;
+}
+
+.donate-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 12px 24px;
+    background-color: #131313;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.donate-btn:hover {
+    background-color: #333;
+}
+
+/* Footer */
+footer {
+    padding: 20px;
     text-align: center;
 }
 
-/* Mobile responsive layout */
+footer a {
+    display: inline-block;
+    margin: 10px;
+    color: #1675bc;
+    text-decoration: underline;
+}
+
+/* Responsive layout */
 @media (max-width: 600px) {
 
-    .game-wrapper {
-        gap: 16px;
+    body {
+        padding: 10px;
     }
 
-    .charity-logo {
-        width: min(210px, 70vw);
+    .hero-panel {
+        flex-direction: column;
+        text-align: center;
     }
 
-    .game-heading {
-        gap: 10px;
-    }
-
-    .water-can-illustration {
-        width: 58px;
-        height: 58px;
+    .hero-copy {
+        text-align: center;
     }
 
     .game-title {
-        font-size: 36px;
+        font-size: 2.25rem;
     }
 
     .game-tagline {
@@ -201,31 +381,25 @@ body {
     }
 
     .score-panel {
-        flex-wrap: wrap;
         justify-content: center;
-        gap: 15px;
     }
 
-    .score, .timer {
-        font-size: 20px;
+    .score,
+    .timer,
+    .goal {
+        font-size: 18px;
     }
 
     #game-container {
         height: 450px;
     }
 
-    @keyframes dropFall {
-        from {
-            transform: translateY(-100%);
-        }
-
-        to {
-            transform: translateY(450px);
-        }
+    #game-message {
+        font-size: 19px;
+        padding: 20px;
     }
 
-    #game-message {
-        font-size: 20px;
+    .mission-section {
         padding: 20px;
     }
 }

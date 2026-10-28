@@ -5,15 +5,50 @@ let dropMaker;
 let gameTimer;
 let score = 0;
 let timeLeft = 30;
+let goal = 20;
+let settings;
+let audioContext;
 
 // Get HTML elements
 const startBtn = document.getElementById("start-btn");
 const scoreDisplay = document.getElementById("score");
 const timeDisplay = document.getElementById("time");
+const goalDisplay = document.getElementById("goal");
 const gameContainer = document.getElementById("game-container");
 const gameMessage = document.getElementById("game-message");
+const difficultySelect = document.getElementById("difficulty");
+const progressBar = document.getElementById("progress-bar");
+const milestoneMessage = document.getElementById("milestone-message");
+const soundToggle = document.getElementById("sound-toggle");
 
-// Possible winning messages
+// Difficulty settings
+const difficulties = {
+    easy: {
+        time: 40,
+        goal: 12,
+        dropSpeed: 800,
+        fallDuration: 5,
+        badChance: 0.1
+    },
+
+    normal: {
+        time: 30,
+        goal: 20,
+        dropSpeed: 500,
+        fallDuration: 4,
+        badChance: 0.2
+    },
+
+    hard: {
+        time: 25,
+        goal: 28,
+        dropSpeed: 350,
+        fallDuration: 3,
+        badChance: 0.3
+    }
+};
+
+// Winning messages
 const winningMessages = [
     "Amazing! You're a Water Drop Champion!",
     "Great job! You saved the water!",
@@ -21,7 +56,7 @@ const winningMessages = [
     "Fantastic work! You're a water hero!"
 ];
 
-// Possible losing messages
+// Losing messages
 const losingMessages = [
     "Good try! Give it another shot!",
     "Keep practicing! Every drop counts!",
@@ -29,53 +64,86 @@ const losingMessages = [
     "Don't give up! You can do it!"
 ];
 
-// Start button event listener
+// Milestone messages
+const milestones = [
+    { percent: 25, message: "Great start! Keep going!" },
+    { percent: 50, message: "Halfway there!" },
+    { percent: 75, message: "Almost at your goal!" },
+    { percent: 100, message: "Goal reached! Keep collecting!" }
+];
+
+// Keep track of milestones already reached
+let reachedMilestones = [];
+
+// Update settings when difficulty changes
+difficultySelect.addEventListener("change", updateDifficulty);
+
+// Start button
 startBtn.addEventListener("click", startGame);
 
 
-// Function to start the game
-function startGame() {
+// Update difficulty settings
+function updateDifficulty() {
 
-    // Prevent multiple games from running
     if (gameRunning) return;
 
-    gameRunning = true;
+    const difficulty = difficultySelect.value;
+    settings = difficulties[difficulty];
 
-    // Reset score and timer
+    goal = settings.goal;
+    timeLeft = settings.time;
+
+    goalDisplay.textContent = goal;
+    timeDisplay.textContent = timeLeft;
+}
+
+
+// Start the game
+function startGame() {
+
+    if (gameRunning) return;
+
+    // Reset game variables
+    gameRunning = true;
     score = 0;
-    timeLeft = 30;
+    reachedMilestones = [];
+
+    updateGameSettings();
 
     scoreDisplay.textContent = score;
     timeDisplay.textContent = timeLeft;
 
-    // Clear any old drops
+    progressBar.style.width = "0%";
+    milestoneMessage.textContent = "";
+
+    // Remove old drops
     document.querySelectorAll(".water-drop").forEach(drop => {
         drop.remove();
     });
 
-    // Hide previous game message
+    // Hide previous message
     gameMessage.style.display = "none";
     gameMessage.textContent = "";
 
-    // Disable start button while playing
+    // Disable settings during game
     startBtn.disabled = true;
     startBtn.textContent = "Playing...";
+    difficultySelect.disabled = true;
 
-    // Create a new drop every 500 milliseconds
-    dropMaker = setInterval(createDrop, 500);
+    // Play starting sound
+    playSound("start");
 
-    // Create the first drop immediately
+    // Create falling drops
+    dropMaker = setInterval(createDrop, settings.dropSpeed);
     createDrop();
 
-    // Countdown timer
+    // Start countdown
     gameTimer = setInterval(() => {
 
         timeLeft--;
 
-        // Update timer display
         timeDisplay.textContent = timeLeft;
 
-        // End game when timer reaches zero
         if (timeLeft <= 0) {
             endGame();
         }
@@ -84,14 +152,28 @@ function startGame() {
 }
 
 
-// Function to create falling drops
+// Load selected difficulty
+function updateGameSettings() {
+
+    settings = difficulties[difficultySelect.value];
+
+    goal = settings.goal;
+    timeLeft = settings.time;
+
+    goalDisplay.textContent = goal;
+}
+
+
+// Create falling water drops
 function createDrop() {
 
-    // Create a new div
+    if (!gameRunning) return;
+
+    // Create drop
     const drop = document.createElement("div");
     drop.className = "water-drop";
 
-    // Give drops different sizes
+    // Random size
     const initialSize = 60;
     const sizeMultiplier = Math.random() * 0.8 + 0.5;
     const size = initialSize * sizeMultiplier;
@@ -99,91 +181,179 @@ function createDrop() {
     drop.style.width = size + "px";
     drop.style.height = size + "px";
 
-    // Get width and height of game area
-    const gameWidth = gameContainer.offsetWidth;
-    const gameHeight = gameContainer.clientHeight;
-
     // Random horizontal position
-    const xPosition = Math.random() * Math.max(0, gameWidth - size);
+    const gameWidth = gameContainer.clientWidth;
+
+    const xPosition = Math.random() *
+        Math.max(0, gameWidth - size);
+
     drop.style.left = xPosition + "px";
 
-    // Make 20% of drops bad
-    const isBadDrop = Math.random() < 0.2;
+    // Random chance of creating bad drop
+    const isBadDrop = Math.random() < settings.badChance;
 
     if (isBadDrop) {
         drop.classList.add("bad-drop");
-        drop.setAttribute("aria-label", "Bad drop");
-    } else {
-        drop.setAttribute("aria-label", "Good drop");
     }
 
-    // Drops fall for 4 seconds
-    drop.style.animationDuration = "4s";
+    // Animation duration
+    drop.style.animationDuration =
+        settings.fallDuration + "s";
 
-    // Set animation distance based on container height
-    // The extra distance lets the drop fully leave the screen
-    const animationName = "fall-" + Date.now() + "-" +
-                          Math.floor(Math.random() * 10000);
+    // Calculate how far the drop should fall
+    const gameHeight = gameContainer.clientHeight;
 
-    const style = document.createElement("style");
+    drop.style.setProperty(
+        "--fall-distance",
+        gameHeight + "px"
+    );
 
-    style.textContent = `
-        @keyframes ${animationName} {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(${gameHeight}px);
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-    drop.style.animationName = animationName;
-
-    // Add drop to game area
+    // Add drop to game
     gameContainer.appendChild(drop);
 
-    // Detect when a drop is clicked
+    // Collect drop when clicked
     drop.addEventListener("pointerdown", () => {
 
-        // Only count points while game is active
         if (!gameRunning) return;
 
         if (isBadDrop) {
-            // Bad drops remove one point
             score--;
+            playSound("bad");
         } else {
-            // Good drops add one point
             score++;
+            playSound("collect");
         }
 
-        // Update score display
+        // Update score
         scoreDisplay.textContent = score;
 
-        // Remove clicked drop
+        // Update progress
+        updateProgress();
+
+        // Check milestones
+        checkMilestones();
+
+        // Remove collected drop
         drop.remove();
-        style.remove();
     });
 
     // Remove missed drops
     drop.addEventListener("animationend", () => {
+
+        if (!drop.isConnected) return;
+
+        if (gameRunning && !isBadDrop) {
+            playSound("miss");
+        }
+
         drop.remove();
-        style.remove();
     });
 }
 
 
-// Function to end the game
+// Update progress bar
+function updateProgress() {
+
+    let percentage = (score / goal) * 100;
+
+    // Keep progress between 0 and 100
+    percentage = Math.max(0, Math.min(100, percentage));
+
+    progressBar.style.width = percentage + "%";
+}
+
+
+// Check player milestones
+function checkMilestones() {
+
+    const percentage = (score / goal) * 100;
+
+    milestones.forEach(milestone => {
+
+        // Only display each milestone once
+        if (
+            percentage >= milestone.percent &&
+            !reachedMilestones.includes(milestone.percent)
+        ) {
+
+            reachedMilestones.push(milestone.percent);
+
+            milestoneMessage.textContent = milestone.message;
+
+            playSound("milestone");
+        }
+    });
+}
+
+
+// Generate simple sound effects
+function playSound(type) {
+
+    if (!soundToggle.checked) return;
+
+    try {
+        // Create audio context when needed
+        if (!audioContext) {
+            audioContext = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+        }
+
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        // Choose sound based on action
+        if (type === "collect") {
+            oscillator.frequency.value = 600;
+        } else if (type === "bad") {
+            oscillator.frequency.value = 180;
+        } else if (type === "miss") {
+            oscillator.frequency.value = 250;
+        } else if (type === "milestone") {
+            oscillator.frequency.value = 900;
+        } else if (type === "win") {
+            oscillator.frequency.value = 1000;
+        } else if (type === "lose") {
+            oscillator.frequency.value = 200;
+        } else {
+            oscillator.frequency.value = 450;
+        }
+
+        oscillator.type = "sine";
+
+        const now = audioContext.currentTime;
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            now + 0.15
+        );
+
+        oscillator.start(now);
+        oscillator.stop(now + 0.15);
+
+    } catch (error) {
+        // Game still works if sound is unsupported
+        console.log("Sound unavailable:", error);
+    }
+}
+
+
+// End the game
 function endGame() {
 
-    // Stop game
     gameRunning = false;
 
-    // Stop creating drops
+    // Stop timers
     clearInterval(dropMaker);
-
-    // Stop countdown timer
     clearInterval(gameTimer);
 
     // Remove remaining drops
@@ -191,34 +361,45 @@ function endGame() {
         drop.remove();
     });
 
-    // Choose a random message
     let message;
 
-    if (score >= 20) {
+    // Determine win or loss
+    if (score >= goal) {
 
-        // Pick a random winning message
         const randomIndex = Math.floor(
             Math.random() * winningMessages.length
         );
 
         message = winningMessages[randomIndex];
 
+        playSound("win");
+
     } else {
 
-        // Pick a random losing message
         const randomIndex = Math.floor(
             Math.random() * losingMessages.length
         );
 
         message = losingMessages[randomIndex];
+
+        playSound("lose");
     }
 
-    // Display final score and message
-    gameMessage.textContent = message + " Final Score: " + score;
+    // Display final result
+    gameMessage.textContent =
+        message + " Final Score: " + score;
 
     gameMessage.style.display = "block";
 
-    // Enable button to play again
+    milestoneMessage.textContent = "Game Over!";
+
+    // Allow replay
     startBtn.disabled = false;
     startBtn.textContent = "Play Again";
+
+    difficultySelect.disabled = false;
 }
+
+
+// Set initial difficulty
+updateDifficulty();
